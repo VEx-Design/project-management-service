@@ -22,10 +22,9 @@ func main() {
 	}
 
 	mongoDB := db.ConnectToMongo()
-	client := mongoDB.GetClient()
 	defer mongoDB.Disconnect()
 
-	projectRep := repository.NewProjectRepositoryMongo(client)
+	projectRep := repository.NewProjectRepositoryMongo(mongoDB.GetClient())
 	projectSrv := service.NewProjectService(projectRep)
 	projectHandler := handler.NewProjectHandler(projectSrv)
 
