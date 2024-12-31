@@ -4,7 +4,8 @@ import (
 	"log"
 	handler "project-management-service/external/handler/adaptors/gin/api"
 	"project-management-service/external/handler/adaptors/gin/router"
-	repository "project-management-service/external/repository/adaptors/mongodb/controller"
+	gorm "project-management-service/external/repository/adaptors/postgres"
+	repository "project-management-service/external/repository/adaptors/postgres/controller"
 	"project-management-service/internal/core/service"
 	"project-management-service/pkg/db"
 	"time"
@@ -21,10 +22,12 @@ func main() {
 		log.Fatalf("err loading: %v", err)
 	}
 
-	mongoDB := db.ConnectToMongo()
-	defer mongoDB.Disconnect()
+	postgresDB := db.ConnectToPG()
+	client := postgresDB.GetClient()
 
-	projectRep := repository.NewProjectRepositoryMongo(mongoDB.GetClient())
+	gorm.SyncDB(client)
+
+	projectRep := repository.NewProjectRepositoryPQ(client)
 	projectSrv := service.NewProjectService(projectRep)
 	projectHandler := handler.NewProjectHandler(projectSrv)
 

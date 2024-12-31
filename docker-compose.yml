@@ -10,6 +10,18 @@ services:
     ports:
       - ${MONGO_DB_DEPLOY_PORT}:27017
 
+  postgresdb:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_DB_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_DB_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+    ports:
+      - ${POSTGRES_DB_DEPLOY_PORT}:5432
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
   minio:
     image: minio/minio
     container_name: minio-local
@@ -26,3 +38,4 @@ services:
 volumes:
   minio_data:
     driver: local
+  db-data:
