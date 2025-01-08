@@ -1,7 +1,7 @@
 package router
 
 import (
-	handler "project-management-service/external/handler/adaptors/gin/api"
+	handler "project-management-service/external/handler/adaptors/rest/api"
 
 	"github.com/gin-gonic/gin"
 )

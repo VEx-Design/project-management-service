@@ -2,8 +2,8 @@ package main
 
 import (
 	"log"
-	handler "project-management-service/external/handler/adaptors/gin/api"
-	"project-management-service/external/handler/adaptors/gin/router"
+	handler "project-management-service/external/handler/adaptors/rest/api"
+	"project-management-service/external/handler/router"
 	gorm "project-management-service/external/repository/adaptors/postgres"
 	repository "project-management-service/external/repository/adaptors/postgres/controller"
 	"project-management-service/internal/core/service"
