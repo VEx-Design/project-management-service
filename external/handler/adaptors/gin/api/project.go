@@ -17,16 +17,54 @@ func NewProjectHandler(projSrv logic.ProjectService) *ProjectHandler {
 	return &ProjectHandler{projSrv: projSrv}
 }
 
+// CreateProject handles the creation of a new project.
 func (h *ProjectHandler) CreateProject(c *gin.Context) {
-	var request request.Project
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var req request.Project
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload", "details": err.Error()})
 		return
 	}
-	newProj := entities.Project{
-		Name:        request.Name,
-		Description: request.Description,
+
+	// Validate required fields
+	if req.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Project name is required"})
+		return
 	}
-	h.projSrv.CreateProject(newProj)
-	c.JSON(200, nil)
+
+	userID := c.GetHeader("X-User-Id")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in headers"})
+		return
+	}
+
+	// Create a new project entity
+	newProj := entities.Project{
+		Name:        req.Name,
+		Description: req.Description,
+		OwnerId:     userID,
+	}
+
+	if err := h.projSrv.CreateProject(newProj); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create project", "details": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "Project created successfully"})
+}
+
+// GetMyProject retrieves the projects for the current user.
+func (h *ProjectHandler) GetMyProject(c *gin.Context) {
+	userId := c.Query("userId")
+	if userId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+		return
+	}
+
+	projects, err := h.projSrv.GetMyProject(userId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve projects", "details": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"projects": projects})
 }

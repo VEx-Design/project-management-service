@@ -45,3 +45,7 @@ func (r *projectRepositoryMongo) CreateProject(project entities.Project) error {
 
 	return nil
 }
+
+func (r *projectRepositoryMongo) GetMyProject(userId string) ([]entities.Project, error) {
+	return nil, nil
+}

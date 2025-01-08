@@ -10,5 +10,6 @@ func RegisterProjectRoutes(router *gin.Engine, projHandler *handler.ProjectHandl
 	api := router.Group("/api/v1")
 	{
 		api.POST("/project", projHandler.CreateProject)
+		api.GET("/project", projHandler.GetMyProject)
 	}
 }
