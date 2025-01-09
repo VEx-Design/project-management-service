@@ -1,0 +1,11 @@
+type Project {
+  id: ID!
+  name: String!
+  description: String
+  flow: String
+  ownerID: String
+}
+
+type Query {
+  projects(ownerID: String): [Project]!
+}
