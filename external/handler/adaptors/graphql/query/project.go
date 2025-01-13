@@ -14,10 +14,11 @@ type ProjectQuery interface {
 
 type projectQuery struct {
 	projSrv logic.ProjectService
+	userSrv logic.UserService
 }
 
-func NewProjectQuery(projectSrv logic.ProjectService) ProjectQuery {
-	return &projectQuery{projSrv: projectSrv}
+func NewProjectQuery(projectSrv logic.ProjectService, userSrv logic.UserService) ProjectQuery {
+	return &projectQuery{projSrv: projectSrv, userSrv: userSrv}
 }
 
 func (q projectQuery) GetProjects(ctx context.Context, ownerID string) ([]*model.Project, error) {
@@ -29,14 +30,22 @@ func (q projectQuery) GetProjects(ctx context.Context, ownerID string) ([]*model
 
 	gqlProjects := make([]*model.Project, len(projects))
 	for i, proj := range projects {
+		user, err := q.userSrv.GetUser(proj.OwnerId)
+		if err != nil {
+			return nil, err
+		}
+
 		gqlProjects[i] = &model.Project{
 			ID:          proj.ID,
 			Name:        proj.Name,
 			Description: &proj.Description,
 			Flow:        &proj.Flow,
-			OwnerID:     &proj.OwnerId,
-			CreatedAt:   proj.CreatedAt.Format(time.RFC3339),
-			UpdatedAt:   proj.UpdatedAt.Format(time.RFC3339),
+			Owner: &model.User{
+				Name:    user.Name,
+				Picture: &user.Picture,
+			},
+			CreatedAt: proj.CreatedAt.Format(time.RFC3339),
+			UpdatedAt: proj.UpdatedAt.Format(time.RFC3339),
 		}
 	}
 

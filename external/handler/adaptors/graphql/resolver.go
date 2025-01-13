@@ -8,4 +8,5 @@ import "project-management-service/internal/core/logic"
 
 type Resolver struct {
 	ProjSrv logic.ProjectService
+	UserSrv logic.UserService
 }

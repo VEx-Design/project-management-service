@@ -7,10 +7,15 @@ type Project struct {
 	Name        string  `json:"name"`
 	Description *string `json:"description,omitempty"`
 	Flow        *string `json:"flow,omitempty"`
-	OwnerID     *string `json:"ownerID,omitempty"`
+	Owner       *User   `json:"owner"`
 	CreatedAt   string  `json:"createdAt"`
 	UpdatedAt   string  `json:"updatedAt"`
 }
 
 type Query struct {
+}
+
+type User struct {
+	Name    string  `json:"name"`
+	Picture *string `json:"picture,omitempty"`
 }

@@ -3,9 +3,14 @@ type Project {
   name: String!
   description: String
   flow: String
-  ownerID: String
+  owner: User!
   createdAt: String!
   updatedAt: String!
+}
+
+type User {
+  name: String!
+  picture: String
 }
 
 type Query {
