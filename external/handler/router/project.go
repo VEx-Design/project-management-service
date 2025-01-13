@@ -10,12 +10,8 @@ import (
 )
 
 func RegisterProjectRoutes(router *gin.Engine, projHandler *handler.ProjectHandler) {
-	// REST API routes
-	api := router.Group("/api/v1")
-	{
-		api.POST("/project", projHandler.CreateProject)
-		api.GET("/project", projHandler.GetMyProject)
-	}
+	router.POST("/project", projHandler.CreateProject)
+	router.GET("/project", projHandler.GetMyProject)
 }
 
 func RegisterGQLRoutes(router *gin.Engine, srv *gqlHandler.Server) {

@@ -51,6 +51,9 @@ func (r *projectRepositoryPQ) GetMyProject(userId string) ([]entities.Project, e
 
 	var projects []gorm_model.Project
 	if err := r.client.Where("owner_id = ?", userId).Find(&projects).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return []entities.Project{}, nil
+		}
 		log.Printf("failed to retrieve projects for user %s: %v", userId, err)
 		return nil, err
 	}
@@ -64,6 +67,8 @@ func (r *projectRepositoryPQ) GetMyProject(userId string) ([]entities.Project, e
 			Name:        p.Name,
 			Description: p.Description,
 			Flow:        p.Flow,
+			CreatedAt:   p.CreatedAt,
+			UpdatedAt:   p.UpdatedAt,
 		})
 	}
 

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"log"
 	ports "project-management-service/external/_ports"
@@ -21,7 +22,7 @@ func (s *projectService) CreateProject(project entities.Project) error {
 	return nil
 }
 
-func (s *projectService) GetMyProject(userId string) ([]entities.Project, error) {
+func (s *projectService) GetMyProject(ctx context.Context, userId string) ([]entities.Project, error) {
 	if userId == "" {
 		return nil, errors.New("user ID is required")
 	}

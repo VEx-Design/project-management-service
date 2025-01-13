@@ -60,7 +60,7 @@ func (h *ProjectHandler) GetMyProject(c *gin.Context) {
 		return
 	}
 
-	projects, err := h.projSrv.GetMyProject(userId)
+	projects, err := h.projSrv.GetMyProject(c, userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve projects", "details": err.Error()})
 		return

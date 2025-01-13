@@ -4,6 +4,8 @@ type Project {
   description: String
   flow: String
   ownerID: String
+  createdAt: String!
+  updatedAt: String!
 }
 
 type Query {

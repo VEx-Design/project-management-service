@@ -1,9 +1,15 @@
 package logic
 
-import "project-management-service/internal/core/entities"
+import (
+	"context"
+	"project-management-service/internal/core/entities"
+)
 
 type ProjectService interface {
 	CreateProject(project entities.Project) error
-	GetMyProject(userId string) ([]entities.Project, error)
-	// GetAllTypes() ([]entities.Type, error)
+	GetMyProject(ctx context.Context, userId string) ([]entities.Project, error)
+}
+
+type UserService interface {
+	GetUser(userId string) (*entities.User, error)
 }

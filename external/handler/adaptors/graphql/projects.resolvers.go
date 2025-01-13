@@ -13,7 +13,7 @@ import (
 // Projects is the resolver for the projects field.
 func (r *queryResolver) Projects(ctx context.Context, ownerID *string) ([]*model.Project, error) {
 	query := query.NewProjectQuery(r.ProjSrv)
-	return query.GetProjects(*ownerID)
+	return query.GetProjects(ctx, *ownerID)
 }
 
 // Query returns QueryResolver implementation.

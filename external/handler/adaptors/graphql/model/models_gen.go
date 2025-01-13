@@ -8,6 +8,8 @@ type Project struct {
 	Description *string `json:"description,omitempty"`
 	Flow        *string `json:"flow,omitempty"`
 	OwnerID     *string `json:"ownerID,omitempty"`
+	CreatedAt   string  `json:"createdAt"`
+	UpdatedAt   string  `json:"updatedAt"`
 }
 
 type Query struct {
