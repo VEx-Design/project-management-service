@@ -42,6 +42,7 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 		Name:        req.Name,
 		Description: req.Description,
 		OwnerId:     userID,
+		Flow:        req.Flow,
 	}
 
 	if err := h.projSrv.CreateProject(newProj); err != nil {

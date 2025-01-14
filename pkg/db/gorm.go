@@ -15,11 +15,12 @@ type postgresdb struct {
 func ConnectToPG() *postgresdb {
 	var err error
 	dsn := fmt.Sprintf(
-		"host=localhost user=%s password=%s dbname=%s port=%s ",
-		os.Getenv("POSTGRES_DB_USERNAME"),
-		os.Getenv("POSTGRES_DB_PASSWORD"),
-		os.Getenv("POSTGRES_DB_NAME"),
-		os.Getenv("POSTGRES_DB_DEPLOY_PORT"),
+		"host=%s user=%s password=%s dbname=%s port=%s ",
+		os.Getenv("PROJECT_DB_HOST"),
+		os.Getenv("PROJECT_DB_USERNAME"),
+		os.Getenv("PROJECT_DB_PASSWORD"),
+		os.Getenv("PROJECT_DB_NAME"),
+		os.Getenv("PROJECT_DB_PORT"),
 	)
 	DB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 

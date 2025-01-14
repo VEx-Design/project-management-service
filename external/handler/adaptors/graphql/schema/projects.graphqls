@@ -14,5 +14,6 @@ type User {
 }
 
 type Query {
-  projects(ownerID: String): [Project]!
+  projects(ownerID: String!): [Project]!
+  project(id: String!): Project
 }

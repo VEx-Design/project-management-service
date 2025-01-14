@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	graph "project-management-service/external/handler/adaptors/graphql"
@@ -23,7 +24,7 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("err loading: %v", err)
+		fmt.Println("Warning: .env file not found, relying on environment variables")
 	}
 
 	r := gin.Default()

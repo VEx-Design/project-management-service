@@ -8,6 +8,7 @@ import (
 type ProjectService interface {
 	CreateProject(project entities.Project) error
 	GetMyProject(ctx context.Context, userId string) ([]entities.Project, error)
+	GetProject(projectId string) (*entities.Project, error)
 }
 
 type UserService interface {

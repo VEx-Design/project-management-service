@@ -74,3 +74,26 @@ func (r *projectRepositoryPQ) GetMyProject(userId string) ([]entities.Project, e
 
 	return result, nil
 }
+
+// GetProject retrieves a project by its ID.
+func (r *projectRepositoryPQ) GetProject(projectId string) (*entities.Project, error) {
+	if projectId == "" {
+		return nil, errors.New("project ID is required")
+	}
+
+	var project gorm_model.Project
+	if err := r.client.Where("id = ?", projectId).First(&project).Error; err != nil {
+		log.Printf("failed to retrieve project %s: %v", projectId, err)
+		return nil, err
+	}
+
+	return &entities.Project{
+		ID:          project.ID,
+		OwnerId:     project.OwnerId,
+		Name:        project.Name,
+		Description: project.Description,
+		Flow:        project.Flow,
+		CreatedAt:   project.CreatedAt,
+		UpdatedAt:   project.UpdatedAt,
+	}, nil
+}

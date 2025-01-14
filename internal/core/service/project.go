@@ -35,3 +35,13 @@ func (s *projectService) GetMyProject(ctx context.Context, userId string) ([]ent
 
 	return projects, nil
 }
+
+func (s *projectService) GetProject(projectId string) (*entities.Project, error) {
+	project, err := s.projRepo.GetProject(projectId)
+	if err != nil {
+		log.Printf("failed to fetch project %s: %v", projectId, err)
+		return nil, err
+	}
+
+	return project, nil
+}

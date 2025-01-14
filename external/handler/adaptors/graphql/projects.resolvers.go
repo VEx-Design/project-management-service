@@ -11,9 +11,15 @@ import (
 )
 
 // Projects is the resolver for the projects field.
-func (r *queryResolver) Projects(ctx context.Context, ownerID *string) ([]*model.Project, error) {
+func (r *queryResolver) Projects(ctx context.Context, ownerID string) ([]*model.Project, error) {
 	query := query.NewProjectQuery(r.ProjSrv, r.UserSrv)
-	return query.GetProjects(ctx, *ownerID)
+	return query.GetProjects(ctx, ownerID)
+}
+
+// Project is the resolver for the project field.
+func (r *queryResolver) Project(ctx context.Context, id string) (*model.Project, error) {
+	query := query.NewProjectQuery(r.ProjSrv, r.UserSrv)
+	return query.GetProject(ctx, id)
 }
 
 // Query returns QueryResolver implementation.
