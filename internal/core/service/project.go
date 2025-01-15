@@ -63,3 +63,12 @@ func (s *projectService) UpdateProjectFlow(project entities.UpdateProjectFlow) e
 	}
 	return nil
 }
+
+func (s *projectService) DeleteProject(userid, projectid string) error {
+	error := s.projRepo.DeleteProject(userid, projectid)
+	if error != nil {
+		log.Printf("failed to delete project %s: %v", projectid, error)
+		return error
+	}
+	return nil
+}

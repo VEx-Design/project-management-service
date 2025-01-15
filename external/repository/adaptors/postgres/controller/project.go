@@ -131,3 +131,16 @@ func (r *projectRepositoryPQ) UpdateProject(project entities.UpdateProject) erro
 
 	return nil
 }
+
+func (r *projectRepositoryPQ) DeleteProject(userId string, projectId string) error {
+	if userId == "" || projectId == "" {
+		return errors.New("user ID and project ID are required")
+	}
+
+	if err := r.client.Where("id = ? AND owner_id = ?", projectId, userId).Delete(&gorm_model.Project{}).Error; err != nil {
+		log.Printf("failed to delete project: %v", err)
+		return err
+	}
+
+	return nil
+}

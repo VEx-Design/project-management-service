@@ -8,4 +8,5 @@ type ProjectRepository interface {
 	GetProject(projectId string) (*entities.Project, error)
 	UpdateProjectFlow(project entities.UpdateProjectFlow) error
 	UpdateProject(project entities.UpdateProject) error
+	DeleteProject(userId string, projectId string) error
 }

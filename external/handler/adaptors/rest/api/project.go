@@ -139,3 +139,21 @@ func (h *ProjectHandler) UpdateProjectFlow(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Project flow updated successfully"})
 }
+
+// DeleteProject deletes a project
+func (h *ProjectHandler) DeleteProject(c *gin.Context) {
+	userId := c.Query("userId")
+	projectId := c.Query("projectId")
+
+	if userId == "" || projectId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID and Project ID are required"})
+		return
+	}
+
+	if err := h.projSrv.DeleteProject(userId, projectId); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete project", "details": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Project deleted successfully"})
+}

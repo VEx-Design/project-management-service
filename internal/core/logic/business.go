@@ -11,6 +11,7 @@ type ProjectService interface {
 	GetProject(projectId string) (*entities.Project, error)
 	UpdateProject(project entities.UpdateProject) error
 	UpdateProjectFlow(project entities.UpdateProjectFlow) error
+	DeleteProject(userid, projectid string) error
 }
 
 type UserService interface {
