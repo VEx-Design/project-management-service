@@ -28,11 +28,12 @@ func (r *projectRepositoryPQ) CreateProject(projectData entities.Project) error 
 	}
 
 	newProject := gorm_model.Project{
-		ID:          uuid.New().String(),
-		OwnerId:     projectData.OwnerId,
-		Name:        projectData.Name,
-		Description: projectData.Description,
-		Flow:        projectData.Flow,
+		ID:              uuid.New().String(),
+		OwnerId:         projectData.OwnerId,
+		Name:            projectData.Name,
+		Description:     projectData.Description,
+		Flow:            projectData.Flow,
+		ConfigurationID: projectData.ConfigurationID,
 	}
 
 	if err := r.client.Create(&newProject).Error; err != nil {
@@ -62,13 +63,14 @@ func (r *projectRepositoryPQ) GetMyProject(userId string) ([]entities.Project, e
 	var result []entities.Project
 	for _, p := range projects {
 		result = append(result, entities.Project{
-			ID:          p.ID,
-			OwnerId:     p.OwnerId,
-			Name:        p.Name,
-			Description: p.Description,
-			Flow:        p.Flow,
-			CreatedAt:   p.CreatedAt,
-			UpdatedAt:   p.UpdatedAt,
+			ID:              p.ID,
+			OwnerId:         p.OwnerId,
+			Name:            p.Name,
+			Description:     p.Description,
+			Flow:            p.Flow,
+			ConfigurationID: p.ConfigurationID,
+			CreatedAt:       p.CreatedAt,
+			UpdatedAt:       p.UpdatedAt,
 		})
 	}
 
@@ -88,12 +90,13 @@ func (r *projectRepositoryPQ) GetProject(projectId string) (*entities.Project, e
 	}
 
 	return &entities.Project{
-		ID:          project.ID,
-		OwnerId:     project.OwnerId,
-		Name:        project.Name,
-		Description: project.Description,
-		Flow:        project.Flow,
-		CreatedAt:   project.CreatedAt,
-		UpdatedAt:   project.UpdatedAt,
+		ID:              project.ID,
+		OwnerId:         project.OwnerId,
+		Name:            project.Name,
+		Description:     project.Description,
+		Flow:            project.Flow,
+		ConfigurationID: project.ConfigurationID,
+		CreatedAt:       project.CreatedAt,
+		UpdatedAt:       project.UpdatedAt,
 	}, nil
 }

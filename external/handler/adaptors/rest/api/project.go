@@ -39,10 +39,11 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 
 	// Create a new project entity
 	newProj := entities.Project{
-		Name:        req.Name,
-		Description: req.Description,
-		OwnerId:     userID,
-		Flow:        req.Flow,
+		Name:            req.Name,
+		Description:     req.Description,
+		OwnerId:         userID,
+		Flow:            req.Flow,
+		ConfigurationID: req.ConfigurationID,
 	}
 
 	if err := h.projSrv.CreateProject(newProj); err != nil {
