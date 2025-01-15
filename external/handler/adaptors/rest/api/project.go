@@ -70,3 +70,41 @@ func (h *ProjectHandler) GetMyProject(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"projects": projects})
 }
+
+// UpdateProject handles the update of a project.
+func (h *ProjectHandler) UpdateProject(c *gin.Context) {
+	var req request.Project
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload", "details": err.Error()})
+		return
+	}
+
+	// Validate required fields
+	if req.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Project name is required"})
+		return
+	}
+
+	userID := c.GetHeader("X-User-Id")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in headers"})
+		return
+	}
+
+	// Create a new project entity
+	newProj := entities.Project{
+		Name:            req.Name,
+		Description:     req.Description,
+		OwnerId:         userID,
+		Flow:            req.Flow,
+		ConfigurationID: req.ConfigurationID,
+	}
+
+	project, err := h.projSrv.UpdateProject(newProj)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update project", "details": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"project": project})
+}

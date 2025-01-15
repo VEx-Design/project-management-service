@@ -100,3 +100,36 @@ func (r *projectRepositoryPQ) GetProject(projectId string) (*entities.Project, e
 		UpdatedAt:       project.UpdatedAt,
 	}, nil
 }
+
+func (r *projectRepositoryPQ) UpdateProject(projectData entities.Project) (entities.Project, error) {
+	if projectData.ID == "" {
+		return entities.Project{}, errors.New("project ID is required")
+	}
+
+	var project gorm_model.Project
+	if err := r.client.Where("id = ?", projectData.ID).First(&project).Error; err != nil {
+		log.Printf("failed to retrieve project %s: %v", projectData.ID, err)
+		return entities.Project{}, err
+	}
+
+	project.Name = projectData.Name
+	project.Description = projectData.Description
+	project.Flow = projectData.Flow
+	project.ConfigurationID = projectData.ConfigurationID
+
+	if err := r.client.Save(&project).Error; err != nil {
+		log.Printf("failed to update project %s: %v", projectData.ID, err)
+		return entities.Project{}, err
+	}
+
+	return entities.Project{
+		ID:              project.ID,
+		OwnerId:         project.OwnerId,
+		Name:            project.Name,
+		Description:     project.Description,
+		Flow:            project.Flow,
+		ConfigurationID: project.ConfigurationID,
+		CreatedAt:       project.CreatedAt,
+		UpdatedAt:       project.UpdatedAt,
+	}, nil
+}

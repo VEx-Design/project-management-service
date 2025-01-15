@@ -6,4 +6,5 @@ type ProjectRepository interface {
 	GetMyProject(userId string) ([]entities.Project, error)
 	CreateProject(project entities.Project) error
 	GetProject(projectId string) (*entities.Project, error)
+	UpdateProject(project entities.Project) (entities.Project, error)
 }

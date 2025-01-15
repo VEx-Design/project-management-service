@@ -45,3 +45,13 @@ func (s *projectService) GetProject(projectId string) (*entities.Project, error)
 
 	return project, nil
 }
+
+func (s *projectService) UpdateProject(project entities.Project) (entities.Project, error) {
+	updatedProject, err := s.projRepo.UpdateProject(project)
+	if err != nil {
+		log.Printf("failed to update project %s: %v", project.ID, err)
+		return entities.Project{}, err
+	}
+
+	return updatedProject, nil
+}

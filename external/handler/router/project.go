@@ -17,6 +17,7 @@ const RequestIDKey = requestID("user_id")
 func RegisterProjectRoutes(router *gin.Engine, projHandler *handler.ProjectHandler) {
 	router.POST("/project", projHandler.CreateProject)
 	router.GET("/project", projHandler.GetMyProject)
+	router.PUT("/project/flow", projHandler.UpdateProject)
 }
 
 func RegisterGQLRoutes(router *gin.Engine, srv *gqlHandler.Server) {
@@ -39,4 +40,5 @@ func RegisterGQLRoutes(router *gin.Engine, srv *gqlHandler.Server) {
 		c.Request = c.Request.WithContext(ctx)
 		srv.ServeHTTP(c.Writer, c.Request)
 	})
+
 }
