@@ -71,17 +71,17 @@ func (h *ProjectHandler) GetMyProject(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"projects": projects})
 }
 
-// UpdateProject handles the update of a project.
+// Update project name and description
 func (h *ProjectHandler) UpdateProject(c *gin.Context) {
-	var req request.Project
+	var req request.UpdateProject
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload", "details": err.Error()})
 		return
 	}
 
 	// Validate required fields
-	if req.Name == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Project name is required"})
+	if req.ID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
 		return
 	}
 
@@ -91,20 +91,51 @@ func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 		return
 	}
 
-	// Create a new project entity
-	newProj := entities.Project{
-		Name:            req.Name,
-		Description:     req.Description,
-		OwnerId:         userID,
-		Flow:            req.Flow,
-		ConfigurationID: req.ConfigurationID,
+	updateProj := entities.UpdateProject{
+		ID:          req.ID,
+		Name:        req.Name,
+		Description: req.Description,
+		UserID:      userID,
 	}
 
-	project, err := h.projSrv.UpdateProject(newProj)
-	if err != nil {
+	if err := h.projSrv.UpdateProject(updateProj); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update project", "details": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"project": project})
+	c.JSON(http.StatusOK, gin.H{"message": "Project updated successfully"})
+}
+
+// UpdateProjectFlow updates the project flow
+func (h *ProjectHandler) UpdateProjectFlow(c *gin.Context) {
+	var req request.UpdateProjectFlow
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload", "details": err.Error()})
+		return
+	}
+
+	// Validate required fields
+	if req.ID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
+		return
+	}
+
+	userID := c.GetHeader("X-User-Id")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in headers"})
+		return
+	}
+
+	updateProj := entities.UpdateProjectFlow{
+		ID:     req.ID,
+		Flow:   req.Flow,
+		UserID: userID,
+	}
+
+	if err := h.projSrv.UpdateProjectFlow(updateProj); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update project flow", "details": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Project flow updated successfully"})
 }

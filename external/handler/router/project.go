@@ -17,7 +17,9 @@ const RequestIDKey = requestID("user_id")
 func RegisterProjectRoutes(router *gin.Engine, projHandler *handler.ProjectHandler) {
 	router.POST("/project", projHandler.CreateProject)
 	router.GET("/project", projHandler.GetMyProject)
-	router.PUT("/project/flow", projHandler.UpdateProject)
+	router.PUT("/project", projHandler.UpdateProject)
+	router.PUT("/project/flow", projHandler.UpdateProjectFlow)
+
 }
 
 func RegisterGQLRoutes(router *gin.Engine, srv *gqlHandler.Server) {

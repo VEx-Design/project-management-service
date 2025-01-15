@@ -9,7 +9,8 @@ type ProjectService interface {
 	CreateProject(project entities.Project) error
 	GetMyProject(ctx context.Context, userId string) ([]entities.Project, error)
 	GetProject(projectId string) (*entities.Project, error)
-	UpdateProject(project entities.Project) (entities.Project, error)
+	UpdateProject(project entities.UpdateProject) error
+	UpdateProjectFlow(project entities.UpdateProjectFlow) error
 }
 
 type UserService interface {

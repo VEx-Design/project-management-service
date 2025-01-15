@@ -46,12 +46,20 @@ func (s *projectService) GetProject(projectId string) (*entities.Project, error)
 	return project, nil
 }
 
-func (s *projectService) UpdateProject(project entities.Project) (entities.Project, error) {
-	updatedProject, err := s.projRepo.UpdateProject(project)
-	if err != nil {
-		log.Printf("failed to update project %s: %v", project.ID, err)
-		return entities.Project{}, err
+func (s *projectService) UpdateProject(project entities.UpdateProject) error {
+	error := s.projRepo.UpdateProject(project)
+	if error != nil {
+		log.Printf("failed to update project %s: %v", project.ID, error)
+		return error
 	}
+	return nil
+}
 
-	return updatedProject, nil
+func (s *projectService) UpdateProjectFlow(project entities.UpdateProjectFlow) error {
+	error := s.projRepo.UpdateProjectFlow(project)
+	if error != nil {
+		log.Printf("failed to update project %s flow: %v", project.ID, error)
+		return error
+	}
+	return nil
 }
