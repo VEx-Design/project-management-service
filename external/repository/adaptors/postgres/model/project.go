@@ -10,6 +10,7 @@ type Project struct {
 	OwnerId         string `gorm:"not null"`
 	Description     string
 	Flow            string
+	TypesConfig     string
 	ConfigurationID uint
 	CreatedAt       time.Time
 	UpdatedAt       time.Time

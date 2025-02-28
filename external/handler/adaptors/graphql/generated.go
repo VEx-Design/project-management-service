@@ -53,6 +53,7 @@ type ComplexityRoot struct {
 		ID          func(childComplexity int) int
 		Name        func(childComplexity int) int
 		Owner       func(childComplexity int) int
+		TypeConfig  func(childComplexity int) int
 		UpdatedAt   func(childComplexity int) int
 	}
 
@@ -132,6 +133,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Project.Owner(childComplexity), true
+
+	case "Project.typeConfig":
+		if e.complexity.Project.TypeConfig == nil {
+			break
+		}
+
+		return e.complexity.Project.TypeConfig(childComplexity), true
 
 	case "Project.updatedAt":
 		if e.complexity.Project.UpdatedAt == nil {
@@ -559,14 +567,61 @@ func (ec *executionContext) _Project_flow(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Project_flow(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Project",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Project_typeConfig(ctx context.Context, field graphql.CollectedField, obj *model.Project) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Project_typeConfig(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TypeConfig, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Project_typeConfig(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Project",
 		Field:      field,
@@ -764,6 +819,8 @@ func (ec *executionContext) fieldContext_Query_projects(ctx context.Context, fie
 				return ec.fieldContext_Project_description(ctx, field)
 			case "flow":
 				return ec.fieldContext_Project_flow(ctx, field)
+			case "typeConfig":
+				return ec.fieldContext_Project_typeConfig(ctx, field)
 			case "owner":
 				return ec.fieldContext_Project_owner(ctx, field)
 			case "createdAt":
@@ -832,6 +889,8 @@ func (ec *executionContext) fieldContext_Query_project(ctx context.Context, fiel
 				return ec.fieldContext_Project_description(ctx, field)
 			case "flow":
 				return ec.fieldContext_Project_flow(ctx, field)
+			case "typeConfig":
+				return ec.fieldContext_Project_typeConfig(ctx, field)
 			case "owner":
 				return ec.fieldContext_Project_owner(ctx, field)
 			case "createdAt":
@@ -2876,6 +2935,14 @@ func (ec *executionContext) _Project(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = ec._Project_description(ctx, field, obj)
 		case "flow":
 			out.Values[i] = ec._Project_flow(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "typeConfig":
+			out.Values[i] = ec._Project_typeConfig(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "owner":
 			out.Values[i] = ec._Project_owner(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
