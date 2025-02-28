@@ -41,7 +41,8 @@ func (q projectQuery) GetProjects(ctx context.Context, ownerID string) ([]*model
 			ID:          proj.ID,
 			Name:        proj.Name,
 			Description: &proj.Description,
-			Flow:        &proj.Flow,
+			Flow:        proj.Flow,
+			TypeConfig:  proj.TypesConfig,
 			Owner: &model.User{
 				Name:    user.Name,
 				Picture: &user.Picture,
@@ -86,7 +87,8 @@ func (q projectQuery) GetProject(ctx context.Context, id string) (*model.Project
 		ID:          proj.ID,
 		Name:        proj.Name,
 		Description: &proj.Description,
-		Flow:        &proj.Flow,
+		Flow:        proj.Flow,
+		TypeConfig:  proj.TypesConfig,
 		Owner: &model.User{
 			Name:    user.Name,
 			Picture: &user.Picture,

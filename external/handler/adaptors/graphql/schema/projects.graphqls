@@ -2,7 +2,8 @@ type Project {
   id: ID!
   name: String!
   description: String
-  flow: String
+  flow: String!
+  typeConfig: String!
   owner: User!
   createdAt: String!
   updatedAt: String!

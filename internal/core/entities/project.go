@@ -7,6 +7,7 @@ type Project struct {
 	Name            string
 	Description     string
 	Flow            string
+	TypesConfig     string
 	OwnerId         string
 	ConfigurationID uint
 	CreatedAt       time.Time

@@ -19,6 +19,7 @@ func RegisterProjectRoutes(router *gin.Engine, projHandler *handler.ProjectHandl
 	router.GET("/project", projHandler.GetMyProject)
 	router.PUT("/project", projHandler.UpdateProject)
 	router.PUT("/project/flow", projHandler.UpdateProjectFlow)
+	router.PUT("/project/type", projHandler.UpdateProjectTypeConfig)
 	router.DELETE("/project", projHandler.DeleteProject)
 
 }

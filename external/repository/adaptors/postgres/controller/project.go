@@ -33,6 +33,7 @@ func (r *projectRepositoryPQ) CreateProject(projectData entities.Project) error 
 		Name:            projectData.Name,
 		Description:     projectData.Description,
 		Flow:            projectData.Flow,
+		TypesConfig:     projectData.TypesConfig,
 		ConfigurationID: projectData.ConfigurationID,
 	}
 
@@ -68,6 +69,7 @@ func (r *projectRepositoryPQ) GetMyProject(userId string) ([]entities.Project, e
 			Name:            p.Name,
 			Description:     p.Description,
 			Flow:            p.Flow,
+			TypesConfig:     p.TypesConfig,
 			ConfigurationID: p.ConfigurationID,
 			CreatedAt:       p.CreatedAt,
 			UpdatedAt:       p.UpdatedAt,
@@ -95,36 +97,35 @@ func (r *projectRepositoryPQ) GetProject(projectId string) (*entities.Project, e
 		Name:            project.Name,
 		Description:     project.Description,
 		Flow:            project.Flow,
+		TypesConfig:     project.TypesConfig,
 		ConfigurationID: project.ConfigurationID,
 		CreatedAt:       project.CreatedAt,
 		UpdatedAt:       project.UpdatedAt,
 	}, nil
 }
 
-// update project flow
-func (r *projectRepositoryPQ) UpdateProjectFlow(project entities.UpdateProjectFlow) error {
-	if project.ID == "" || project.Flow == "" || project.UserID == "" {
-		return errors.New("project ID, flow, and user ID are required")
-	}
-
-	if err := r.client.Model(&gorm_model.Project{}).Where("id = ? AND owner_id = ?", project.ID, project.UserID).Update("flow", project.Flow).Error; err != nil {
-		log.Printf("failed to update project flow: %v", err)
-		return err
-	}
-
-	return nil
-}
-
 // updates a project name and description in the database.
-func (r *projectRepositoryPQ) UpdateProject(project entities.UpdateProject) error {
-	if project.ID == "" || project.UserID == "" {
+func (r *projectRepositoryPQ) UpdateProject(project entities.Project, userId string) error {
+	if project.ID == "" || userId == "" {
 		return errors.New("project ID and user ID are required")
 	}
 
-	if err := r.client.Model(&gorm_model.Project{}).Where("id = ? AND owner_id = ?", project.ID, project.UserID).Updates(gorm_model.Project{
-		Name:        project.Name,
-		Description: project.Description,
-	}).Error; err != nil {
+	updates := make(map[string]interface{})
+	if project.Name != "" {
+		updates["name"] = project.Name
+	}
+	if project.Description != "" {
+		updates["description"] = project.Description
+	}
+	if project.Flow != "" {
+		updates["flow"] = project.Flow
+	}
+	if project.TypesConfig != "" {
+		updates["types_config"] = project.TypesConfig
+
+	}
+
+	if err := r.client.Model(&gorm_model.Project{}).Where("id = ? AND owner_id = ?", project.ID, userId).Updates(updates).Error; err != nil {
 		log.Printf("failed to update project: %v", err)
 		return err
 	}
@@ -132,7 +133,7 @@ func (r *projectRepositoryPQ) UpdateProject(project entities.UpdateProject) erro
 	return nil
 }
 
-func (r *projectRepositoryPQ) DeleteProject(userId string, projectId string) error {
+func (r *projectRepositoryPQ) DeleteProject(projectId string, userId string) error {
 	if userId == "" || projectId == "" {
 		return errors.New("user ID and project ID are required")
 	}

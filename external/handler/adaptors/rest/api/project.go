@@ -43,6 +43,7 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 		Description:     req.Description,
 		OwnerId:         userID,
 		Flow:            req.Flow,
+		TypesConfig:     req.TypesConfig,
 		ConfigurationID: req.ConfigurationID,
 	}
 
@@ -91,14 +92,13 @@ func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 		return
 	}
 
-	updateProj := entities.UpdateProject{
+	updateProj := entities.Project{
 		ID:          req.ID,
 		Name:        req.Name,
 		Description: req.Description,
-		UserID:      userID,
 	}
 
-	if err := h.projSrv.UpdateProject(updateProj); err != nil {
+	if err := h.projSrv.UpdateProject(updateProj, userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update project", "details": err.Error()})
 		return
 	}
@@ -126,18 +126,50 @@ func (h *ProjectHandler) UpdateProjectFlow(c *gin.Context) {
 		return
 	}
 
-	updateProj := entities.UpdateProjectFlow{
-		ID:     req.ID,
-		Flow:   req.Flow,
-		UserID: userID,
+	updateProj := entities.Project{
+		ID:   req.ID,
+		Flow: req.Flow,
 	}
 
-	if err := h.projSrv.UpdateProjectFlow(updateProj); err != nil {
+	if err := h.projSrv.UpdateProject(updateProj, userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update project flow", "details": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Project flow updated successfully"})
+}
+
+// UpdateProjectTypeConfig updates the project type configuration
+func (h *ProjectHandler) UpdateProjectTypeConfig(c *gin.Context) {
+	var req request.UpdateProjectTypeConfig
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload", "details": err.Error()})
+		return
+	}
+
+	// Validate required fields
+	if req.ID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
+		return
+	}
+
+	userID := c.GetHeader("X-User-Id")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in headers"})
+		return
+	}
+
+	updateProj := entities.Project{
+		ID:          req.ID,
+		TypesConfig: req.TypesConfig,
+	}
+
+	if err := h.projSrv.UpdateProject(updateProj, userID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update project type configuration", "details": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Project type configuration updated successfully"})
 }
 
 // DeleteProject deletes a project

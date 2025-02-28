@@ -46,8 +46,8 @@ func (s *projectService) GetProject(projectId string) (*entities.Project, error)
 	return project, nil
 }
 
-func (s *projectService) UpdateProject(project entities.UpdateProject) error {
-	error := s.projRepo.UpdateProject(project)
+func (s *projectService) UpdateProject(project entities.Project, userId string) error {
+	error := s.projRepo.UpdateProject(project, userId)
 	if error != nil {
 		log.Printf("failed to update project %s: %v", project.ID, error)
 		return error
@@ -55,19 +55,10 @@ func (s *projectService) UpdateProject(project entities.UpdateProject) error {
 	return nil
 }
 
-func (s *projectService) UpdateProjectFlow(project entities.UpdateProjectFlow) error {
-	error := s.projRepo.UpdateProjectFlow(project)
+func (s *projectService) DeleteProject(projectId string, userId string) error {
+	error := s.projRepo.DeleteProject(projectId, userId)
 	if error != nil {
-		log.Printf("failed to update project %s flow: %v", project.ID, error)
-		return error
-	}
-	return nil
-}
-
-func (s *projectService) DeleteProject(userid, projectid string) error {
-	error := s.projRepo.DeleteProject(userid, projectid)
-	if error != nil {
-		log.Printf("failed to delete project %s: %v", projectid, error)
+		log.Printf("failed to delete project %s: %v", projectId, error)
 		return error
 	}
 	return nil

@@ -6,7 +6,8 @@ type Project struct {
 	ID          string  `json:"id"`
 	Name        string  `json:"name"`
 	Description *string `json:"description,omitempty"`
-	Flow        *string `json:"flow,omitempty"`
+	Flow        string  `json:"flow"`
+	TypeConfig  string  `json:"typeConfig"`
 	Owner       *User   `json:"owner"`
 	CreatedAt   string  `json:"createdAt"`
 	UpdatedAt   string  `json:"updatedAt"`
