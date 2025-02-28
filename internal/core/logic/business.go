@@ -12,6 +12,12 @@ type ProjectService interface {
 	UpdateProject(project entities.UpdateProject) error
 	UpdateProjectFlow(project entities.UpdateProjectFlow) error
 	DeleteProject(userid, projectid string) error
+
+	PublicShare(projectId string) error
+	GetPublicSharedProjects() ([]entities.Project, error)
+	DepublicShare(projectId string) error
+	CanCloneProject(projectId string) (bool, error)
+	CloneProject(projectId string, newOwnerId string) (*entities.Project, error)
 }
 
 type UserService interface {

@@ -1,8 +1,10 @@
 package entities
 
 type UpdateProject struct {
-	ID          string
-	Name        string
-	Description string
-	UserID      string
+	ID           string
+	Name         string
+	Description  string
+	UserID       string
+	Shared       string
+	SharedAccess string
 }

@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 	"project-management-service/external/handler/adaptors/graphql/model"
 	"project-management-service/external/handler/adaptors/graphql/query"
 )
@@ -18,6 +19,7 @@ func (r *queryResolver) Projects(ctx context.Context, ownerID string) ([]*model.
 
 // Project is the resolver for the project field.
 func (r *queryResolver) Project(ctx context.Context, id string) (*model.Project, error) {
+	fmt.Println("id", id)
 	query := query.NewProjectQuery(r.ProjSrv, r.UserSrv)
 	return query.GetProject(ctx, id)
 }

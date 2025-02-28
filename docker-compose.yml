@@ -1,30 +1,164 @@
-version: "3.0"
+version: "3.8"
+
+name: vex-design
 
 services:
-  mongodb:
-    container_name: mongodb-${DB_CONTAINER_NAME}
-    image: mongo:latest
+  api-gateway:
+    image: ballatipat/vex-api-gateway
+    restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_DB_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_DB_PASSWORD}
+      SECRET: ${SECRET}
+      USER_INFO_SERVICE_HOST: user-info-service
+      USER_INFO_SERVICE_PORT: ${USER_INFO_SERVICE_PORT}
+      PROJECT_SERVICE_HOST: 172.24.160.1
+      PROJECT_SERVICE_PORT: ${PROJECT_SERVICE_PORT}
+      TYPE_SERVICE_HOST: type-management-service
+      TYPE_SERVICE_PORT: ${TYPE_SERVICE_PORT}
+      FILE_SERVICE_HOST: file-management-service
+      FILE_SERVICE_PORT: ${FILE_SERVICE_PORT}
     ports:
-      - ${MONGO_DB_DEPLOY_PORT}:27017
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - user-info-service
+      - project-management-service
+      - type-management-service
+      - file-management-service
+    networks:
+      - backend-service-network
 
-  postgresdb:
+  auth-service:
+    image: ballatipat/vex-auth-service
+    restart: always
+    environment:
+      USER_DB_USERNAME: ${USER_DB_USERNAME}
+      USER_DB_PASSWORD: ${USER_DB_PASSWORD}
+      USER_DB_NAME: ${USER_DB_NAME}
+      USER_DB_HOST: user-db
+      USER_DB_PORT: 5432
+      SECRET: ${SECRET}
+      UUID_SECRET: ${UUID_SECRET}
+      GOOGLE_ID: ${GOOGLE_ID}
+      GOOGLE_SECRET: ${GOOGLE_SECRET}
+    ports:
+      - "6740:6740"
+    depends_on:
+      - user-db
+    networks:
+      - backend-service-network
+      - user-management-service-network
+
+  user-info-service:
+    image: ballatipat/vex-user-info-service
+    restart: always
+    environment:
+      USER_DB_USERNAME: ${USER_DB_USERNAME}
+      USER_DB_PASSWORD: ${USER_DB_PASSWORD}
+      USER_DB_NAME: ${USER_DB_NAME}
+      USER_DB_HOST: user-db
+      USER_DB_PORT: 5432
+    ports:
+      - "50051:50051"
+    depends_on:
+      - user-db
+    networks:
+      - backend-service-network
+      - user-management-service-network
+
+  user-db:
     image: postgres
     restart: always
     environment:
-      POSTGRES_USER: ${POSTGRES_DB_USERNAME}
-      POSTGRES_PASSWORD: ${POSTGRES_DB_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB_NAME}
+      POSTGRES_USER: ${USER_DB_USERNAME}
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD}
+      POSTGRES_DB: ${USER_DB_NAME}
     ports:
-      - ${POSTGRES_DB_DEPLOY_PORT}:5432
+      - ${USER_DB_DEPLOY_PORT}:5432
+    networks:
+      - user-management-service-network
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - user-db-data:/var/lib/postgresql/data
 
-  minio:
+  project-management-service:
+    image: ballatipat/vex-project-management-service:lastest
+    restart: always
+    environment:
+      USER_INFO_SERVICE_HOST: user-info-service
+      USER_INFO_SERVICE_PORT: ${USER_INFO_SERVICE_PORT}
+      PROJECT_DB_USERNAME: ${PROJECT_DB_USERNAME}
+      PROJECT_DB_PASSWORD: ${PROJECT_DB_PASSWORD}
+      PROJECT_DB_NAME: ${PROJECT_DB_NAME}
+      PROJECT_DB_HOST: project-db
+      PROJECT_DB_DEPLOY_PORT: 5432
+    ports:
+      - "8081:8081"
+    depends_on:
+      - project-db
+    networks:
+      - backend-service-network
+      - project-management-service-network
+
+  project-db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${PROJECT_DB_USERNAME}
+      POSTGRES_PASSWORD: ${PROJECT_DB_PASSWORD}
+      POSTGRES_DB: ${PROJECT_DB_NAME}
+    ports:
+      - ${PROJECT_DB_DEPLOY_PORT}:5432
+    networks:
+      - project-management-service-network
+    volumes:
+      - project-db-data:/var/lib/postgresql/data
+
+  type-management-service:
+    image: ballatipat/vex-type-management-service
+    restart: always
+    environment:
+      TYPE_MONGO_DB_DEPLOY_HOST: type-mongodb
+      TYPE_MONGO_DB_DEPLOY_PORT: 27017
+      TYPE_MONGO_DB_USERNAME: ${TYPE_MONGO_DB_USERNAME}
+      TYPE_MONGO_DB_PASSWORD: ${TYPE_MONGO_DB_PASSWORD}
+    ports:
+      - "8082:8082"
+    depends_on:
+      - type-mongodb
+    networks:
+      - backend-service-network
+      - type-management-service-network
+
+  type-mongodb:
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${TYPE_MONGO_DB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${TYPE_MONGO_DB_PASSWORD}
+    ports:
+      - ${TYPE_MONGO_DB_DEPLOY_PORT}:27017
+    networks:
+      - type-management-service-network
+    volumes:
+      - mongo-type-data:/data/db
+
+  file-management-service:
+    image: ballatipat/vex-file-management-service
+    restart: always
+    environment:
+      MINIO_ENDPOINT: minio-storage:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "8088:8088"
+    depends_on:
+      - minio-storage
+    networks:
+      - backend-service-network
+      - file-management-service-network
+
+  minio-storage:
     image: minio/minio
-    container_name: minio-local
+    restart: always
     environment:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
@@ -34,8 +168,44 @@ services:
       - 9000:9000
       - 9001:9001
     command: server /data --console-address ":9001"
+    networks:
+      - backend-service-network
+      - file-management-service-network
+
+networks:
+  backend-service-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 178.1.0.0/16
+          gateway: 178.1.0.1
+  project-management-service-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 201.2.0.0/16
+          gateway: 201.2.0.1
+  user-management-service-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 201.1.0.0/16
+          gateway: 201.1.0.1
+  type-management-service-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 201.3.0.0/16
+          gateway: 201.3.0.1
+  file-management-service-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 201.4.0.0/16
+          gateway: 201.4.0.1
 
 volumes:
+  user-db-data:
+  project-db-data:
+  mongo-type-data:
   minio_data:
-    driver: local
-  db-data:

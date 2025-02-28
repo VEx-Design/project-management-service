@@ -72,3 +72,51 @@ func (s *projectService) DeleteProject(userid, projectid string) error {
 	}
 	return nil
 }
+
+func (s *projectService) PublicShare(projectId string) error {
+	error := s.projRepo.PublicShare(projectId)
+	if error != nil {
+		log.Printf("failed to share project %s: %v", projectId, error)
+		return error
+	}
+	return nil
+}
+
+func (s *projectService) DepublicShare(projectId string) error {
+	error := s.projRepo.DepublicShare(projectId)
+	if error != nil {
+		log.Printf("failed to unshare project %s: %v", projectId, error)
+		return error
+	}
+	return nil
+}
+
+func (s *projectService) GetPublicSharedProjects() ([]entities.Project, error) {
+	projects, err := s.projRepo.GetPublicSharedProjects()
+	if err != nil {
+		log.Printf("failed to fetch public shared projects: %v", err)
+		return nil, err
+	}
+
+	return projects, nil
+}
+
+func (s *projectService) CanCloneProject(projectId string) (bool, error) {
+	canClone, err := s.projRepo.CanCloneProject(projectId)
+	if err != nil {
+		log.Printf("failed to check if project %s can be cloned: %v", projectId, err)
+		return false, err
+	}
+
+	return canClone, nil
+}
+
+func (s *projectService) CloneProject(projectId string, newOwnerId string) (*entities.Project, error) {
+	shared, err := s.projRepo.CloneProject(projectId, newOwnerId)
+	if err != nil {
+		log.Printf("failed to clone project %s: %v", projectId, err)
+		return nil, err
+	}
+
+	return shared, nil
+}

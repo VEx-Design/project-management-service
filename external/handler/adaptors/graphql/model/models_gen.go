@@ -10,6 +10,9 @@ type Project struct {
 	Owner       *User   `json:"owner"`
 	CreatedAt   string  `json:"createdAt"`
 	UpdatedAt   string  `json:"updatedAt"`
+	Shared      string  `json:"shared"`
+	SharedAccess string  `json:"sharedAccess"`
+	
 }
 
 type Query struct {

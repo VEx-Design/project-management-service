@@ -11,4 +11,7 @@ type Project struct {
 	ConfigurationID uint
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
+	Shared          string
+	SharedAccess    string
+	CloneAble       bool
 }

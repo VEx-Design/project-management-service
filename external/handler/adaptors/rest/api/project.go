@@ -157,3 +157,103 @@ func (h *ProjectHandler) DeleteProject(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Project deleted successfully"})
 }
+
+// PublicShare marks a project as public.
+func (h *ProjectHandler) PublicShare(c *gin.Context) {
+	projectID := c.Param("projectId")
+	if projectID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
+		return
+	}
+
+	err := h.projSrv.PublicShare(projectID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to make project public", "details": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Project is now public"})
+}
+
+func (h *ProjectHandler) DepublicShare(c *gin.Context) {
+	projectID := c.Param("projectId")
+	if projectID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
+		return
+	}
+
+	err := h.projSrv.DepublicShare(projectID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to make project private", "details": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Project is now private"})
+}
+
+// GetPublicSharedProjects retrieves all publicly shared projects.
+func (h *ProjectHandler) GetPublicSharedProjects(c *gin.Context) {
+	projects, err := h.projSrv.GetPublicSharedProjects()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve public projects", "details": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"projects": projects})
+}
+
+func (h *ProjectHandler) CanCloneProject(c *gin.Context) {
+	// Retrieve projectId from URL params
+	projectId := c.Param("projectId")
+	if projectId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
+		return
+	}
+
+	// Call the service method to check if the project can be cloned
+	canClone, err := h.projSrv.CanCloneProject(projectId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check clone availability", "details": err.Error()})
+		return
+	}
+
+	// Return the result
+	c.JSON(http.StatusOK, gin.H{"canClone": canClone})
+}
+
+// CloneProject handles the cloning of a project by a user.
+func (h *ProjectHandler) CloneProject(c *gin.Context) {
+	// Get projectId from the URL params
+	projectId := c.Param("projectId")
+	if projectId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
+		return
+	}
+
+	// Get newOwnerId from the request body or query params
+	var req struct {
+		NewOwnerId string `json:"newOwnerId" binding:"required"`
+	}
+
+	// Bind the request body to extract newOwnerId
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload", "details": err.Error()})
+		return
+	}
+
+	// Check if newOwnerId is provided
+	if req.NewOwnerId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "New owner ID is required"})
+		return
+	}
+
+	// Call the service method to clone the project
+	clonedProject, err := h.projSrv.CloneProject(projectId, req.NewOwnerId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clone project", "details": err.Error()})
+		return
+	}
+
+	// Return the cloned project details in the response
+	c.JSON(http.StatusOK, gin.H{"message": "Project cloned successfully", "project": clonedProject})
+}

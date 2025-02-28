@@ -21,6 +21,11 @@ func RegisterProjectRoutes(router *gin.Engine, projHandler *handler.ProjectHandl
 	router.PUT("/project/flow", projHandler.UpdateProjectFlow)
 	router.DELETE("/project", projHandler.DeleteProject)
 
+	router.PUT("/:projectId/public", projHandler.PublicShare)     // Make project public
+	router.PUT("/:projectId/depublic", projHandler.DepublicShare) // Make project private
+	router.GET("/public", projHandler.GetPublicSharedProjects)    // Get public projects
+	router.PUT("/clone/check/:projectId", projHandler.CanCloneProject)
+	router.POST("/clone/:projectId", projHandler.CloneProject)
 }
 
 func RegisterGQLRoutes(router *gin.Engine, srv *gqlHandler.Server) {
