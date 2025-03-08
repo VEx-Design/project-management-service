@@ -110,6 +110,19 @@ func (r *projectRepositoryPQ) UpdateProject(project entities.Project, userId str
 		return errors.New("project ID and user ID are required")
 	}
 
+	// Fetch the project to check ownership and shared access permissions
+	var existingProject gorm_model.Project
+	if err := r.client.Where("id = ?", project.ID).First(&existingProject).Error; err != nil {
+		log.Printf("failed to find project: %v", err)
+		return errors.New("project not found")
+	}
+
+	// Check if the user is the owner or has 'can_edit' access
+	if !(existingProject.OwnerId == userId || existingProject.SharedAccess == "can_edit") {
+		return errors.New("unauthorized: you do not have permission to edit this project")
+	}
+
+	// Prepare updates
 	updates := make(map[string]interface{})
 	if project.Name != "" {
 		updates["name"] = project.Name
@@ -122,10 +135,10 @@ func (r *projectRepositoryPQ) UpdateProject(project entities.Project, userId str
 	}
 	if project.TypesConfig != "" {
 		updates["types_config"] = project.TypesConfig
-
 	}
 
-	if err := r.client.Model(&gorm_model.Project{}).Where("id = ? AND owner_id = ?", project.ID, userId).Updates(updates).Error; err != nil {
+	// Apply updates
+	if err := r.client.Model(&gorm_model.Project{}).Where("id = ?", project.ID).Updates(updates).Error; err != nil {
 		log.Printf("failed to update project: %v", err)
 		return err
 	}
@@ -184,6 +197,7 @@ func (r *projectRepositoryPQ) DepublicShare(projectId string) error {
 		Updates(map[string]interface{}{
 			"shared":        "",
 			"shared_access": "",
+			"clone_able":    false,
 		})
 
 	if result.Error != nil {
@@ -221,7 +235,7 @@ func (r *projectRepositoryPQ) GetPublicSharedProjects() ([]entities.Project, err
 			UpdatedAt:       p.UpdatedAt,
 			Shared:          p.Shared,
 			SharedAccess:    p.SharedAccess,
-			// CloneAble:       p.CloneAble,
+			CloneAble:       p.CloneAble,
 		}
 	}
 
@@ -261,8 +275,6 @@ func (r *projectRepositoryPQ) CanCloneProject(projectId string) (bool, error) {
 	return false, nil
 }
 
-// CloneProject clones an existing project by duplicating its details,
-// assigning it a new owner, and setting the CloneAble field to true.
 func (r *projectRepositoryPQ) CloneProject(projectId string, newOwnerId string) (*entities.Project, error) {
 	if projectId == "" || newOwnerId == "" {
 		return nil, errors.New("project ID and new owner ID are required")
@@ -270,9 +282,9 @@ func (r *projectRepositoryPQ) CloneProject(projectId string, newOwnerId string) 
 
 	// Find the project by ID
 	var originalProject gorm_model.Project
-	err := r.client.Model(&gorm_model.Project{}).Where("id = ?", projectId).First(&originalProject).Error
+	err := r.client.Where("id = ?", projectId).First(&originalProject).Error
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("no project found with the given ID")
 		}
 		return nil, err
@@ -283,16 +295,17 @@ func (r *projectRepositoryPQ) CloneProject(projectId string, newOwnerId string) 
 		return nil, errors.New("project is not clonable")
 	}
 
-	// Create a new project entity by duplicating the original project data
+	// Create a new project entity by duplicating the original project data with a new UUID
 	clonedProject := gorm_model.Project{
+		ID:              uuid.New().String(), // Generate a new unique ID
 		Name:            originalProject.Name,
 		Description:     originalProject.Description,
-		OwnerId:         newOwnerId, // Set new owner
+		OwnerId:         newOwnerId, // Assign new owner
 		Flow:            originalProject.Flow,
 		ConfigurationID: originalProject.ConfigurationID,
-		Shared:          originalProject.Shared,       // Retain the shared setting
-		SharedAccess:    originalProject.SharedAccess, // Retain shared access
-		CloneAble:       originalProject.CloneAble,    // Retain clone ability (which should already be true)
+		Shared:          originalProject.Shared,
+		SharedAccess:    originalProject.SharedAccess,
+		CloneAble:       originalProject.CloneAble,
 	}
 
 	// Save the cloned project in the database
@@ -301,7 +314,7 @@ func (r *projectRepositoryPQ) CloneProject(projectId string, newOwnerId string) 
 		return nil, err
 	}
 
-	// Convert the cloned project into an entities.Project and return
+	// Convert the cloned project into an `entities.Project` and return
 	entitiesProject := &entities.Project{
 		ID:              clonedProject.ID,
 		Name:            clonedProject.Name,

@@ -253,39 +253,36 @@ func (h *ProjectHandler) CanCloneProject(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"canClone": canClone})
 }
 
-// CloneProject handles the cloning of a project by a user.
 func (h *ProjectHandler) CloneProject(c *gin.Context) {
-	// Get projectId from the URL params
-	projectId := c.Param("projectId")
-	if projectId == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
-		return
-	}
-
-	// Get newOwnerId from the request body or query params
 	var req struct {
-		NewOwnerId string `json:"newOwnerId" binding:"required"`
+		ProjectID  string `json:"projectId" binding:"required"`
+		NewOwnerID string `json:"newOwnerId" binding:"required"`
 	}
 
-	// Bind the request body to extract newOwnerId
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload", "details": err.Error()})
 		return
 	}
 
-	// Check if newOwnerId is provided
-	if req.NewOwnerId == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "New owner ID is required"})
+	// Retrieve the original project to check the owner ID
+	project, err := h.projSrv.GetProject(req.ProjectID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found", "details": err.Error()})
 		return
 	}
 
-	// Call the service method to clone the project
-	clonedProject, err := h.projSrv.CloneProject(projectId, req.NewOwnerId)
+	// Check if the owner is the same as the new owner
+	if project.OwnerId == req.NewOwnerID {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot clone a project to the same owner"})
+		return
+	}
+
+	// Proceed with cloning the project
+	clonedProject, err := h.projSrv.CloneProject(req.ProjectID, req.NewOwnerID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clone project", "details": err.Error()})
 		return
 	}
 
-	// Return the cloned project details in the response
-	c.JSON(http.StatusOK, gin.H{"message": "Project cloned successfully", "project": clonedProject})
+	c.JSON(http.StatusCreated, gin.H{"message": "Project cloned successfully", "clonedProject": clonedProject})
 }

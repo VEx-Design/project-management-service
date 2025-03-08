@@ -7,6 +7,9 @@ type Project {
   owner: User!
   createdAt: String!
   updatedAt: String!
+  shared: String
+  sharedaccess: String
+  cloneable : Boolean 
 }
 
 type User {
@@ -17,4 +20,5 @@ type User {
 type Query {
   projects(ownerID: String!): [Project]!
   project(id: String!): Project
+  publicprojects: [Project!]!
 }
