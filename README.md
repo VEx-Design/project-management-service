@@ -1,7 +1,7 @@
 # Project Management Service
 
 ## Introduction
-The Project Management Service is designed to streamline the planning, execution, and monitoring of projects. It offers tools to manage tasks, timelines, and resources, ensuring that projects are completed efficiently and effectively.
+The Project Management Service is designed for manage about project such as create update delete and cloning project.
 
 ## Features
 - Create and update project
